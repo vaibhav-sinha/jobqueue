@@ -70,13 +70,13 @@ func (s *Store) initStmt() {
 	var err error
 
 	// Create statement
-	s.createStmt, err = s.db.Prepare("INSERT INTO jobqueue_jobs (id,topic,state,args,rank,priority,retry,max_retry,correlation_group,correlation_id,created,started,completed,last_mod) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)")
+	s.createStmt, err = s.db.Prepare("INSERT INTO jobqueue_jobs (id,topic,state,args,`rank`,priority,retry,max_retry,correlation_group,correlation_id,created,started,completed,last_mod) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)")
 	if err != nil {
 		panic(err)
 	}
 
 	// Update statement
-	s.updateStmt, err = s.db.Prepare("UPDATE jobqueue_jobs SET topic=?,state=?,args=?,rank=?,priority=?,retry=?,max_retry=?,correlation_group=?,correlation_id=?,created=?,started=?,completed=?,last_mod=? WHERE id=?")
+	s.updateStmt, err = s.db.Prepare("UPDATE jobqueue_jobs SET topic=?,state=?,args=?,`rank`=?,priority=?,retry=?,max_retry=?,correlation_group=?,correlation_id=?,created=?,started=?,completed=?,last_mod=? WHERE id=?")
 	if err != nil {
 		panic(err)
 	}
@@ -88,19 +88,19 @@ func (s *Store) initStmt() {
 	}
 
 	// Next statement
-	s.nextStmt, err = s.db.Prepare("SELECT id,topic,state,args,rank,priority,retry,max_retry,correlation_group,correlation_id,created,started,completed,last_mod FROM jobqueue_jobs WHERE state=? ORDER BY rank DESC, priority DESC LIMIT 1")
+	s.nextStmt, err = s.db.Prepare("SELECT id,topic,state,args,`rank`,priority,retry,max_retry,correlation_group,correlation_id,created,started,completed,last_mod FROM jobqueue_jobs WHERE state=? ORDER BY rank DESC, priority DESC LIMIT 1")
 	if err != nil {
 		panic(err)
 	}
 
 	// Lookup (by id) statement
-	s.lookupStmt, err = s.db.Prepare("SELECT id,topic,state,args,rank,priority,retry,max_retry,correlation_group,correlation_id,created,started,completed,last_mod FROM jobqueue_jobs WHERE id=? LIMIT 1")
+	s.lookupStmt, err = s.db.Prepare("SELECT id,topic,state,args,`rank`,priority,retry,max_retry,correlation_group,correlation_id,created,started,completed,last_mod FROM jobqueue_jobs WHERE id=? LIMIT 1")
 	if err != nil {
 		panic(err)
 	}
 
 	// Lookup by correlation id
-	s.lookupByCorrIDStmt, err = s.db.Prepare("SELECT id,topic,state,args,rank,priority,retry,max_retry,correlation_group,correlation_id,created,started,completed,last_mod FROM jobqueue_jobs WHERE correlation_id=? LIMIT 1")
+	s.lookupByCorrIDStmt, err = s.db.Prepare("SELECT id,topic,state,args,`rank`,priority,retry,max_retry,correlation_group,correlation_id,created,started,completed,last_mod FROM jobqueue_jobs WHERE correlation_id=? LIMIT 1")
 	if err != nil {
 		panic(err)
 	}
@@ -402,7 +402,7 @@ func (s *Store) List(ctx context.Context, request *jobqueue.ListRequest) (*jobqu
 
 	resp := &jobqueue.ListResponse{}
 
-	columns := "id,topic,state,args,rank,priority,retry,max_retry,correlation_group,correlation_id,created,started,completed,last_mod"
+	columns := "id,topic,state,args,`rank`,priority,retry,max_retry,correlation_group,correlation_id,created,started,completed,last_mod"
 	where := make(map[string]interface{})
 	countBuilder := sq.Select("COUNT(*)").From("jobqueue_jobs")
 	queryBuilder := sq.Select(columns).From("jobqueue_jobs")
