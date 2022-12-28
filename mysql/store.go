@@ -5,7 +5,6 @@ import (
 	"database/sql"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"sync"
 	"time"
 
@@ -15,42 +14,6 @@ import (
 
 	"github.com/olivere/jobqueue"
 	"github.com/olivere/jobqueue/mysql/internal"
-)
-
-const (
-	mysqlSchema = `CREATE TABLE IF NOT EXISTS jobqueue_jobs (
-id varchar(36) primary key,
-topic varchar(255),
-state varchar(30),
-args text,
-priority bigint,
-retry integer,
-max_retry integer,
-correlation_id varchar(255),
-created bigint,
-started bigint,
-completed bigint,
-last_mod bigint,
-index ix_jobs_topic (topic),
-index ix_jobs_state (state),
-index ix_jobs_priority (priority),
-index ix_jobs_correlation_id (correlation_id),
-index ix_jobs_created (created),
-index ix_jobs_started (started),
-index ix_jobs_completed (completed),
-index ix_jobs_last_mod (last_mod));`
-
-	// add rank column and index on (rank, priority)
-	mysqlUpdate001 = `ALTER TABLE jobqueue_jobs ADD rank INT NOT NULL DEFAULT '0', ADD INDEX ix_jobs_rank_priority (rank, priority);`
-
-	// add correlation_group column and index on (correlation_group, correlation_id)
-	mysqlUpdate002 = `ALTER TABLE jobqueue_jobs ADD correlation_group varchar(255), ADD INDEX ix_jobs_correlation_group_and_id (correlation_group, correlation_id);`
-
-	// add index on state and correlation_group and id
-	mysqlUpdate003 = `ALTER TABLE jobqueue_jobs ADD INDEX ix_jobs_state_correlation_group_and_id (state, correlation_group, id);`
-
-	// change args from text to mediumtext
-	mysqlUpdate004 = `ALTER TABLE jobqueue_jobs CHANGE COLUMN args args MEDIUMTEXT;`
 )
 
 // Store represents a persistent MySQL storage implementation.
@@ -85,107 +48,11 @@ func NewStore(url string, options ...StoreOption) (*Store, error) {
 	if dbname == "" {
 		return nil, errors.New("no database specified")
 	}
-	// First connect without DB name
-	cfg.DBName = ""
-	initdb, err := sql.Open("mysql", cfg.FormatDSN())
-	if err != nil {
-		return nil, err
-	}
-	defer initdb.Close()
-	// Create database
-	_, err = initdb.Exec(fmt.Sprintf("CREATE DATABASE IF NOT EXISTS `%s`", dbname))
-	if err != nil {
-		return nil, err
-	}
 
 	// Now connect again, this time with the db name
 	st.db, err = sql.Open("mysql", url)
 	if err != nil {
 		return nil, err
-	}
-
-	// Create schema
-	_, err = st.db.Exec(mysqlSchema)
-	if err != nil {
-		return nil, err
-	}
-
-	// Apply update 001
-	var count int64
-	err = st.db.QueryRow(`
-	SELECT COUNT(*) AS cnt
-		FROM information_schema.COLUMNS
-		WHERE TABLE_SCHEMA = ?
-		AND TABLE_NAME = 'jobqueue_jobs'
-		AND COLUMN_NAME = 'rank'
-	`, dbname).Scan(&count)
-	if err != nil {
-		return nil, err
-	}
-	if count == 0 {
-		// Apply migration
-		_, err = st.db.Exec(mysqlUpdate001)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	// Apply update 002
-	err = st.db.QueryRow(`
-		SELECT COUNT(*) AS cnt
-			FROM information_schema.COLUMNS
-			WHERE TABLE_SCHEMA = ?
-			AND TABLE_NAME = 'jobqueue_jobs'
-			AND COLUMN_NAME = 'correlation_group'
-		`, dbname).Scan(&count)
-	if err != nil {
-		return nil, err
-	}
-	if count == 0 {
-		// Apply migration
-		_, err = st.db.Exec(mysqlUpdate002)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	// Apply update 003
-	err = st.db.QueryRow(`
-		SELECT COUNT(*) AS cnt
-			FROM information_schema.STATISTICS
-			WHERE TABLE_SCHEMA = ?
-			AND TABLE_NAME = 'jobqueue_jobs'
-			AND INDEX_NAME = 'ix_jobs_state_correlation_group_and_id'
-		`, dbname).Scan(&count)
-	if err != nil {
-		return nil, err
-	}
-	if count == 0 {
-		// Apply migration
-		_, err = st.db.Exec(mysqlUpdate003)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	// Apply update 004
-	err = st.db.QueryRow(`
-		SELECT COUNT(*) AS cnt
-			FROM information_schema.COLUMNS
-			WHERE TABLE_SCHEMA = ?
-			AND TABLE_NAME = 'jobqueue_jobs'
-			AND COLUMN_NAME = 'args'
-			AND DATA_TYPE = 'text'
-		`, dbname).Scan(&count)
-	if err != nil {
-		return nil, err
-	}
-	if count == 1 {
-		// Apply migration
-		_, err = st.db.Exec(mysqlUpdate004)
-		if err != nil {
-			return nil, err
-		}
 	}
 
 	return st, nil

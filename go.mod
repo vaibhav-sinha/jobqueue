@@ -1,4 +1,4 @@
-module github.com/olivere/jobqueue
+module github.com/vaibhav-sinha/jobqueue
 
 go 1.15
 
