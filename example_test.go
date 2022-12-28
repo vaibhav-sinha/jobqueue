@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/olivere/jobqueue"
+	"github.com/vaibhav-sinha/jobqueue"
 )
 
 func ExampleManager() {

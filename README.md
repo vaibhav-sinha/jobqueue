@@ -2,28 +2,28 @@
 
 Jobqueue manages running and scheduling jobs (think Sidekiq or Resque).
 
-[![Test](https://github.com/olivere/jobqueue/actions/workflows/test.yaml/badge.svg)](https://github.com/olivere/jobqueue/actions/workflows/test.yaml)
-[![Docs](http://img.shields.io/badge/godoc-reference-blue.svg?style=flat)](https://pkg.go.dev/github.com/olivere/jobqueue)
-[![License](http://img.shields.io/badge/license-MIT-red.svg?style=flat)](https://raw.githubusercontent.com/olivere/jobqueue/master/LICENSE)
+[![Test](https://github.com/vaibhav-sinha/jobqueue/actions/workflows/test.yaml/badge.svg)](https://github.com/vaibhav-sinha/jobqueue/actions/workflows/test.yaml)
+[![Docs](http://img.shields.io/badge/godoc-reference-blue.svg?style=flat)](https://pkg.go.dev/github.com/vaibhav-sinha/jobqueue)
+[![License](http://img.shields.io/badge/license-MIT-red.svg?style=flat)](https://raw.githubusercontent.com/vaibhav-sinha/jobqueue/master/LICENSE)
 
 ## Prerequisites
 
 You can choose between
-[MySQL](https://travis-ci.org/olivere/jobqueue/master/mysql)
+[MySQL](https://travis-ci.org/vaibhav-sinha/jobqueue/master/mysql)
 and
-[MongoDB](https://travis-ci.org/olivere/jobqueue/master/mongodb)
+[MongoDB](https://travis-ci.org/vaibhav-sinha/jobqueue/master/mongodb)
 as a backend for persistent storage.
 
 ## Getting started
 
-Get the repository with `go get github.com/olivere/jobqueue`.
+Get the repository with `go get github.com/vaibhav-sinha/jobqueue`.
 
 Example:
 
 ```go
 import (
-	"github.com/olivere/jobqueue"
-	"github.com/olivere/jobqueue/mysql"
+	"github.com/vaibhav-sinha/jobqueue"
+	"github.com/vaibhav-sinha/jobqueue/mysql"
 )
 
 // Create a MySQL-based persistent backend.
@@ -90,8 +90,8 @@ go run main.go
 
 Then open your web browser at [http://127.0.0.1:12345](http://127.0.0.1:12345).
 
-![Screenshot](https://raw.githubusercontent.com/olivere/jobqueue/master/doc/screenshot1.png)
+![Screenshot](https://raw.githubusercontent.com/vaibhav-sinha/jobqueue/master/doc/screenshot1.png)
 
 # License
 
-MIT License. See [LICENSE](https://olivere.mit-license.org/) file for details.
+MIT License. See [LICENSE](https://vaibhav-sinha.mit-license.org/) file for details.

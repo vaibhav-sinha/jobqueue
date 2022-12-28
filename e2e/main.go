@@ -13,9 +13,9 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/olivere/jobqueue"
-	"github.com/olivere/jobqueue/mongodb"
-	"github.com/olivere/jobqueue/mysql"
+	"github.com/vaibhav-sinha/jobqueue"
+	"github.com/vaibhav-sinha/jobqueue/mongodb"
+	"github.com/vaibhav-sinha/jobqueue/mysql"
 )
 
 var (

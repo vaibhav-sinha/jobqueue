@@ -12,8 +12,8 @@ import (
 	"github.com/go-sql-driver/mysql"
 	"golang.org/x/sync/errgroup"
 
-	"github.com/olivere/jobqueue"
-	"github.com/olivere/jobqueue/mysql/internal"
+	"github.com/vaibhav-sinha/jobqueue"
+	"github.com/vaibhav-sinha/jobqueue/mysql/internal"
 )
 
 // Store represents a persistent MySQL storage implementation.
