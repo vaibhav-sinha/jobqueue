@@ -88,7 +88,7 @@ func (s *Store) initStmt() {
 	}
 
 	// Next statement
-	s.nextStmt, err = s.db.Prepare("SELECT id,topic,state,args,`rank`,priority,retry,max_retry,correlation_group,correlation_id,created,started,completed,last_mod FROM jobqueue_jobs WHERE state=? ORDER BY rank DESC, priority DESC LIMIT 1")
+	s.nextStmt, err = s.db.Prepare("SELECT id,topic,state,args,`rank`,priority,retry,max_retry,correlation_group,correlation_id,created,started,completed,last_mod FROM jobqueue_jobs WHERE state=? ORDER BY `rank` DESC, priority DESC LIMIT 1")
 	if err != nil {
 		panic(err)
 	}
