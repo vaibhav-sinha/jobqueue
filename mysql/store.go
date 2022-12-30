@@ -58,6 +58,17 @@ func NewStore(url string, options ...StoreOption) (*Store, error) {
 	return st, nil
 }
 
+func NewStoreWithDb(db *sql.DB, options ...StoreOption) (*Store, error) {
+	st := &Store{
+		db: db,
+	}
+	for _, opt := range options {
+		opt(st)
+	}
+
+	return st, nil
+}
+
 // SetDebug indicates whether to enable or disable debugging (which will
 // output SQL to the console).
 func SetDebug(enabled bool) StoreOption {
