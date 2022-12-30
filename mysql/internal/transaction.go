@@ -88,7 +88,8 @@ func RunInTx(ctx context.Context, db *sql.DB, fn func(context.Context, *sql.Tx) 
 		err = fn(ctx, existingSqlTx)
 		return
 	} else {
-		tx, err := db.Begin()
+		var tx *sql.Tx
+		tx, err = db.Begin()
 		if err != nil {
 			return err
 		}
