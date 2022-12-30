@@ -74,8 +74,8 @@ func RunInTx(ctx context.Context, db *sql.DB, fn func(context.Context, *sql.Tx) 
 	ctxTx := ctx.Value("tx")
 	if ctxTx != nil {
 		existingTx := ctxTx.(*gorm.DB)
-		pool := existingTx.Statement.ConnPool
-		existingSqlTx, txExists = pool.(*sql.Tx)
+		pool := existingTx.Statement.ConnPool.(*gorm.PreparedStmtTX)
+		existingSqlTx, txExists = pool.Tx.(*sql.Tx)
 	}
 
 	if txExists {
