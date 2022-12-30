@@ -16,4 +16,5 @@ require (
 	gopkg.in/check.v1 v1.0.0-20200902074654-038fdea0a05b // indirect
 	modernc.org/sqlite v1.10.7
 	modernc.org/strutil v1.1.1 // indirect
+	gorm.io/gorm v1.24.2
 )

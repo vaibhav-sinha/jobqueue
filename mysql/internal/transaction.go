@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/cenkalti/backoff"
+	"gorm.io/gorm"
 )
 
 // Run runs fn with the given database connection.
@@ -55,10 +56,10 @@ func RunWithRetryBackoff(ctx context.Context, db *sql.DB, fn func(context.Contex
 //
 // There are a few rules that fn must respect:
 //
-// 1. fn must use the passed tx reference for all database calls.
-// 2. fn must not commit or rollback the transaction: Run will do that.
-// 3. fn must be idempotent, i.e. it may be called several times
-//    without side effects.
+//  1. fn must use the passed tx reference for all database calls.
+//  2. fn must not commit or rollback the transaction: Run will do that.
+//  3. fn must be idempotent, i.e. it may be called several times
+//     without side effects.
 //
 // If fn returns nil, RunInTx commits the transaction, returning
 // the Commit and a nil error if it succeeds.
@@ -68,22 +69,42 @@ func RunWithRetryBackoff(ctx context.Context, db *sql.DB, fn func(context.Contex
 //
 // RunInTx also recovers from panics, e.g. in fn.
 func RunInTx(ctx context.Context, db *sql.DB, fn func(context.Context, *sql.Tx) error) (err error) {
-	tx, err := db.Begin()
-	if err != nil {
-		return err
+	var existingSqlTx *sql.Tx
+	var txExists bool
+	ctxTx := ctx.Value("tx")
+	if ctxTx != nil {
+		existingTx := ctxTx.(*gorm.DB)
+		pool := existingTx.Statement.ConnPool
+		existingSqlTx, txExists = pool.(*sql.Tx)
 	}
-	defer func() {
-		if rerr := recover(); rerr != nil {
-			err = fmt.Errorf("%v", rerr)
-			_ = tx.Rollback()
+
+	if txExists {
+		defer func() {
+			if rerr := recover(); rerr != nil {
+				err = fmt.Errorf("%v", rerr)
+			}
+		}()
+
+		err = fn(ctx, existingSqlTx)
+		return
+	} else {
+		tx, err := db.Begin()
+		if err != nil {
+			return err
 		}
-	}()
-	if err = fn(ctx, tx); err != nil {
-		_ = tx.Rollback()
-		return err
+		defer func() {
+			if rerr := recover(); rerr != nil {
+				err = fmt.Errorf("%v", rerr)
+				_ = tx.Rollback()
+			}
+		}()
+		if err = fn(ctx, tx); err != nil {
+			_ = tx.Rollback()
+			return
+		}
+		err = tx.Commit()
+		return
 	}
-	err = tx.Commit()
-	return err
 }
 
 // RunInTxWithRetry is like RunInTx but will retry
